@@ -31,7 +31,7 @@ public class ModbusClient {
     private byte[] protocolIdentifier = new byte[2];
     private byte[] length = new byte[2];
     private byte[] crc = new byte[2];
-    private byte unitIdentifier = 10;
+    private byte unitIdentifier = 1;
     private byte functionCode;
     private byte[] startingAddress = new byte[2];
     private byte[] quantity = new byte[2];

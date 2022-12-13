@@ -13,6 +13,9 @@ public class TableReports {
     @Column(columnDefinition = "INT")
     private String numberAct;
 
+    @Column(columnDefinition = "INT")
+    private String numberProd;
+
     @Column(columnDefinition = "VARCHAR(45)")
     private String numberDrawing;
 
@@ -21,6 +24,9 @@ public class TableReports {
 
     @Column(columnDefinition = "FLOAT")
     private float actualForce;
+
+    @Column(columnDefinition = "FLOAT")
+    private float actualForce2;
 
     @Column(columnDefinition = "FLOAT")
     private float maxDeformation;
@@ -53,6 +59,14 @@ public class TableReports {
         this.numberAct = numberAct;
     }
 
+    public String getNumberProd() {
+        return numberProd;
+    }
+
+    public void setNumberProd(String numberProd) {
+        this.numberProd = numberProd;
+    }
+
     public String getNumberDrawing() {
         return numberDrawing;
     }
@@ -75,6 +89,14 @@ public class TableReports {
 
     public void setActualForce(float actualForce) {
         this.actualForce = actualForce;
+    }
+
+    public float getActualForce2() {
+        return actualForce2;
+    }
+
+    public void setActualForce2(float actualForce2) {
+        this.actualForce2 = actualForce2;
     }
 
     public float getMaxDeformation() {
@@ -101,12 +123,12 @@ public class TableReports {
         this.valid = valid;
     }
 
-    public String getAuthor() {
+    public String getAuthorId() {
         return authorId;
     }
 
-    public void setAuthor(String author) {
-        this.authorId = author;
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
     public String getDateTime() {

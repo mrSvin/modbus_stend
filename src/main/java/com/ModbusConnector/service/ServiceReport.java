@@ -14,11 +14,12 @@ public class ServiceReport {
     @Autowired
     private TableReportsRepository tableReportsRepository;
 
-    public String addReport(float actForce1R, int authorId, float maxDeformation, int actNum, int drawNum, float ostDeformation, float needForce, int resultR) {
+    public String addReport(float actForce1R, float actForce2R, int authorId, float maxDeformation, int actNum, int drawNum,
+                            float ostDeformation, float needForce, int resultR, int numberProd) {
         Date date = new Date();
         System.out.println("test " + authorId);
         System.out.println("test " + actForce1R);
-        tableReportsRepository.addReport(actForce1R, authorId, date, maxDeformation, actNum, drawNum, ostDeformation, needForce, resultR);
+        tableReportsRepository.addReport(actForce1R, actForce2R, authorId, date, maxDeformation, actNum, drawNum, ostDeformation, needForce, resultR, numberProd);
         return "ok";
     }
 

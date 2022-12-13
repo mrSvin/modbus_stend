@@ -1,10 +1,9 @@
 package com.ModbusConnector.restController;
 
 
-import com.ModbusConnector.Stend;
+import com.ModbusConnector.devices.Stend;
 import com.ModbusConnector.api.response.ResponseLastData;
 import com.ModbusConnector.model.TableReports;
-import com.ModbusConnector.service.Connector;
 import com.ModbusConnector.service.ServiceReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
