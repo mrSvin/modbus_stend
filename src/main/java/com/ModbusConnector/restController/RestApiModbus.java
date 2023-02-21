@@ -2,7 +2,7 @@ package com.ModbusConnector.restController;
 
 
 import com.ModbusConnector.devices.Stend;
-import com.ModbusConnector.api.response.ResponseLastData;
+import com.ModbusConnector.api.response.ResponseStend;
 import com.ModbusConnector.model.TableReports;
 import com.ModbusConnector.service.ServiceReport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class RestApiModbus {
     }
 
     @GetMapping("/stendLastData")
-    private ResponseLastData stendLastData() {
+    private ResponseStend stendLastData() {
         return stend.lastData();
     }
 

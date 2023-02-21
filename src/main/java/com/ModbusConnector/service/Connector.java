@@ -18,8 +18,9 @@ public class Connector extends Thread {
     private Kv12 kv12;
     private Liefeld110 liefeld110;
     private Liefeld135 liefeld135;
+    private Progress progress;
 
-    public Connector(Stend stend, Epp epp, Ar55 ar55, LiteykaBig liteykaBig, LiteykaMedium liteykaMedium, PechNerg pechNerg, Nk600 nk600, Sclad sclad, Kv12 kv12, Liefeld110 liefeld110, Liefeld135 liefeld135) {
+    public Connector(Stend stend, Epp epp, Ar55 ar55, LiteykaBig liteykaBig, LiteykaMedium liteykaMedium, PechNerg pechNerg, Nk600 nk600, Sclad sclad, Kv12 kv12, Liefeld110 liefeld110, Liefeld135 liefeld135, Progress progress) {
         this.stend = stend;
         this.epp = epp;
         this.ar55 = ar55;
@@ -31,6 +32,7 @@ public class Connector extends Thread {
         this.kv12 = kv12;
         this.liefeld110 = liefeld110;
         this.liefeld135 = liefeld135;
+        this.progress = progress;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -44,10 +46,11 @@ public class Connector extends Thread {
 //        liteykaMedium.data();
 //        nk600.data();
 //        sclad.data();
-//        kv12.data();
 //        pechNerg.data();
-        liefeld110.data();
-        liefeld135.data();
+//        liefeld110.data();
+//        liefeld135.data();
+//        kv12.data();
+        progress.data();
 
     }
 

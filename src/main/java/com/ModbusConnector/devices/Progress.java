@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class Ar55 {
+public class Progress {
 
     List<List> parserData = new ArrayList<>();
 
@@ -48,7 +48,7 @@ public class Ar55 {
     private int status = 3;
     private ModbusClient modbusClient;
     private int countConnect=0;
-    private String complexTable = "ar55_days";
+    private String complexTable = "progress_days";
 
     @Autowired
     Solution solution;
@@ -58,7 +58,7 @@ public class Ar55 {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.17.126", 502);
+            modbusClient = new ModbusClient("192.168.17.143", 502);
 
             if (connect(modbusClient)) {
                 parser(modbusClient);
@@ -113,15 +113,16 @@ public class Ar55 {
                 parserData.add(intValues);
                 parserData.add(floatValues);
 
+
+                int[] dataInt;
                 try {
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5252, 2)));
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5254, 2)));
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5256, 2)));
 
                     System.out.println("tok a: " + floatValues.get(0));
-//                    System.out.println("tok a: " + floatValues.get(1));
-//                    System.out.println("tok a: " + floatValues.get(2));
-
+                    System.out.println("tok b: " + floatValues.get(1));
+                    System.out.println("tok c: " + floatValues.get(2));
 
                 } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
@@ -144,8 +145,7 @@ public class Ar55 {
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
         float tok = (float) parserData.get(1).get(0);
-
-        if (tok > 1.3) {
+        if (tok > 15) {
             status = 1;
         } else {
             status = 2;
@@ -393,6 +393,5 @@ public class Ar55 {
         }
 
     }
-
 
 }

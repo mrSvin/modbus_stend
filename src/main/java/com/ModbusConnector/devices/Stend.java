@@ -1,12 +1,11 @@
 package com.ModbusConnector.devices;
 
 import com.ModbusConnector.MySQL;
-import com.ModbusConnector.api.response.ResponseLastData;
+import com.ModbusConnector.api.response.ResponseStend;
 import com.ModbusConnector.repository.TableReportsRepository;
 import com.ModbusConnector.service.ServiceReport;
 import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @Service
 public class Stend {
@@ -523,29 +517,29 @@ public class Stend {
 
     }
 
-    public ResponseLastData lastData() {
-        ResponseLastData responseLastData = new ResponseLastData();
+    public ResponseStend lastData() {
+        ResponseStend responseStend = new ResponseStend();
         try {
-            responseLastData.setRequestWriteDB(requestWriteDB);
-            responseLastData.setProdNum(prodNum);
-            responseLastData.setActNum(actNum);
-            responseLastData.setAuthorId(authorId);
-            responseLastData.setResultR(resultR);
-            responseLastData.setDrawNum(drawNum);
-            responseLastData.setWorkMode(workMode);
-            responseLastData.setMaxDeformation(maxDeformation);
-            responseLastData.setOstDeformation(ostDeformation);
-            responseLastData.setActForce1R(actForce1R);
-            responseLastData.setActForce2R(actForce2R);
-            responseLastData.setNeedForce(needForce);
-            responseLastData.setLastRequest(lastRequest);
+            responseStend.setRequestWriteDB(requestWriteDB);
+            responseStend.setProdNum(prodNum);
+            responseStend.setActNum(actNum);
+            responseStend.setAuthorId(authorId);
+            responseStend.setResultR(resultR);
+            responseStend.setDrawNum(drawNum);
+            responseStend.setWorkMode(workMode);
+            responseStend.setMaxDeformation(maxDeformation);
+            responseStend.setOstDeformation(ostDeformation);
+            responseStend.setActForce1R(actForce1R);
+            responseStend.setActForce2R(actForce2R);
+            responseStend.setNeedForce(needForce);
+            responseStend.setLastRequest(lastRequest);
 
 //            postRequest(authCoocie);
 
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
-        return responseLastData;
+        return responseStend;
     }
 
     private String dateNow() {

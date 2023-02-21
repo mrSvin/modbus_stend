@@ -2,12 +2,8 @@ package com.ModbusConnector.devices;
 
 import com.ModbusConnector.MySQL;
 import com.ModbusConnector.Solution;
-import com.ModbusConnector.api.response.ResponseLastData;
-import com.ModbusConnector.repository.TableReportsRepository;
-import com.ModbusConnector.service.ServiceReport;
 import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +12,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @Service
 public class PechNerg {

@@ -118,8 +118,8 @@ public class Liefeld110 {
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5256, 2)));
 
                     System.out.println("tok a: " + floatValues.get(0));
-//                    System.out.println("tok a: " + floatValues.get(1));
-//                    System.out.println("tok a: " + floatValues.get(2));
+//                    System.out.println("tok b: " + floatValues.get(1));
+//                    System.out.println("tok c: " + floatValues.get(2));
 
 
                 } catch (ModbusException | IOException e) {

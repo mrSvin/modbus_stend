@@ -2,12 +2,8 @@ package com.ModbusConnector.devices;
 
 import com.ModbusConnector.MySQL;
 import com.ModbusConnector.Solution;
-import com.ModbusConnector.api.response.ResponseLastData;
-import com.ModbusConnector.repository.TableReportsRepository;
-import com.ModbusConnector.service.ServiceReport;
 import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +12,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @Service
 public class Kv12 {
@@ -130,9 +119,11 @@ public class Kv12 {
                     dataInt = modbusClient.ReadHoldingRegisters(0, 2);
                     intValues.add(dataInt[0]);
                     intValues.add(dataInt[1]);
+                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(4, 2)));
 
 //                    System.out.println("tabel: " + intValues.get(0));
 //                    System.out.println("oborots: " + intValues.get(1));
+                    System.out.println("power: " + floatValues.get(0));
 
                 } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
@@ -154,9 +145,9 @@ public class Kv12 {
 
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
-        int oborots = (int) parserData.get(0).get(1);
+        float power = (float) parserData.get(1).get(0);
 
-        if (oborots > 10) {
+        if (power > 1) {
             status = 1;
         } else {
             status = 2;

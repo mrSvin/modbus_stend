@@ -2,12 +2,8 @@ package com.ModbusConnector.devices;
 
 import com.ModbusConnector.MySQL;
 import com.ModbusConnector.Solution;
-import com.ModbusConnector.api.response.ResponseLastData;
-import com.ModbusConnector.repository.TableReportsRepository;
-import com.ModbusConnector.service.ServiceReport;
 import de.re.easymodbus.exceptions.ModbusException;
 import de.re.easymodbus.modbusclient.ModbusClient;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +12,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 @Service
 public class Sclad {
@@ -133,10 +122,10 @@ public class Sclad {
                     intValues.add(dataInt[2]);
                     intValues.add(dataInt[3]);
 
-//                    System.out.println("nomer: " + intValues.get(0));
-//                    System.out.println("gotov: " + intValues.get(1));
-//                    System.out.println("rabota: " + intValues.get(2));
-//                    System.out.println("avar: " + intValues.get(3));
+                    System.out.println("nomer: " + intValues.get(0));
+                    System.out.println("gotov: " + intValues.get(1));
+                    System.out.println("rabota: " + intValues.get(2));
+                    System.out.println("avar: " + intValues.get(3));
 
                 } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
@@ -159,8 +148,8 @@ public class Sclad {
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
 
-        int rabota = (int) parserData.get(0).get(0);
-        int avar = (int) parserData.get(0).get(0);
+        int rabota = (int) parserData.get(0).get(2);
+        int avar = (int) parserData.get(0).get(3);
 
         if (rabota > 0) {
             status = 1;
