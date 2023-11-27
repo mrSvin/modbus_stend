@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class Liefeld135 {
+public class Saw {
+
     List<List> parserData = new ArrayList<>();
 
     private String dayNow = "null";
@@ -47,7 +48,7 @@ public class Liefeld135 {
     private int status = 3;
     private ModbusClient modbusClient;
     private int countConnect=0;
-    private String complexTable = "liefeld135_days";
+    private String complexTable = "saw_days";
 
     @Autowired
     Solution solution;
@@ -57,7 +58,7 @@ public class Liefeld135 {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.17.141", 502);
+            modbusClient = new ModbusClient("192.168.17.148", 502);
 
             if (connect(modbusClient)) {
                 parser(modbusClient);
@@ -117,9 +118,9 @@ public class Liefeld135 {
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5254, 2)));
                     floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5256, 2)));
 
-                    System.out.println("tok a: " + floatValues.get(0));
-//                    System.out.println("tok a: " + floatValues.get(1));
-//                    System.out.println("tok a: " + floatValues.get(2));
+//                    System.out.println("tok a: " + floatValues.get(0));
+//                    System.out.println("tok b: " + floatValues.get(1));
+//                    System.out.println("tok c: " + floatValues.get(2));
 
 
                 } catch (ModbusException | IOException e) {
@@ -143,6 +144,7 @@ public class Liefeld135 {
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
         float tok = (float) parserData.get(1).get(0);
+
         if (tok > 30) {
             status = 1;
         } else {
@@ -394,6 +396,5 @@ public class Liefeld135 {
         }
 
     }
-
 
 }

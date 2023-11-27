@@ -150,6 +150,9 @@ public class Ar55 {
         } else {
             status = 2;
         }
+        if (tok == 0.0) {
+            status = 3;
+        }
         //System.out.println("findStatus: " + status);
         return status;
     }

@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class Liefeld135 {
+public class Press {
+
     List<List> parserData = new ArrayList<>();
 
     private String dayNow = "null";
@@ -46,8 +47,12 @@ public class Liefeld135 {
     private String sql_request;
     private int status = 3;
     private ModbusClient modbusClient;
-    private int countConnect=0;
-    private String complexTable = "liefeld135_days";
+    private int countConnect = 0;
+    private String complexTable = "press_days";
+
+    private float realDavlenie;
+    private float zadDavlenie;
+    private int[] stauscikl;
 
     @Autowired
     Solution solution;
@@ -57,7 +62,7 @@ public class Liefeld135 {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.17.141", 502);
+            modbusClient = new ModbusClient("192.168.17.49", 777);
 
             if (connect(modbusClient)) {
                 parser(modbusClient);
@@ -65,7 +70,7 @@ public class Liefeld135 {
                 countConnect = 0;
             } else {
                 countConnect++;
-                if (countConnect>3) {
+                if (countConnect > 3) {
                     status = 3;
                 }
 
@@ -112,15 +117,14 @@ public class Liefeld135 {
                 parserData.add(intValues);
                 parserData.add(floatValues);
 
+
                 try {
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5252, 2)));
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5254, 2)));
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5256, 2)));
-
-                    System.out.println("tok a: " + floatValues.get(0));
-//                    System.out.println("tok a: " + floatValues.get(1));
-//                    System.out.println("tok a: " + floatValues.get(2));
-
+                    realDavlenie = ModbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(0, 2));
+                    zadDavlenie = ModbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(4, 2));
+                    stauscikl = modbusClient.ReadHoldingRegisters(2, 1);
+//                    System.out.println("давление на прессе " + realDavlenie);
+//                    System.out.println("Зад. давление на прессе " + zadDavlenie);
+//                    System.out.println("цикл " + stauscikl[0]);
 
                 } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
@@ -142,14 +146,10 @@ public class Liefeld135 {
 
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
-        float tok = (float) parserData.get(1).get(0);
-        if (tok > 30) {
+        if (stauscikl[0] == 1) {
             status = 1;
         } else {
             status = 2;
-        }
-        if (tok == 0.0) {
-            status = 3;
         }
         //System.out.println("findStatus: " + status);
         return status;
@@ -277,7 +277,7 @@ public class Liefeld135 {
         if (status == 1 && triger_work != 1) {
             triger_work = 1;
             work_arrayList.add(timeDateNow);
-            programname_arrayList.add("null");
+            programname_arrayList.add(String.valueOf(zadDavlenie));
         }
         if (status != 1 && triger_work != 0) {
             triger_work = 0;
@@ -394,6 +394,5 @@ public class Liefeld135 {
         }
 
     }
-
 
 }

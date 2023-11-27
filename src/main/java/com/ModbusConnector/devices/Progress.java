@@ -47,7 +47,7 @@ public class Progress {
     private String sql_request;
     private int status = 3;
     private ModbusClient modbusClient;
-    private int countConnect=0;
+    private int countConnect = 0;
     private String complexTable = "progress_days";
 
     @Autowired
@@ -66,7 +66,7 @@ public class Progress {
                 countConnect = 0;
             } else {
                 countConnect++;
-                if (countConnect>3) {
+                if (countConnect > 3) {
                     status = 3;
                 }
 
@@ -145,12 +145,18 @@ public class Progress {
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
         float tok = (float) parserData.get(1).get(0);
-        if (tok > 15) {
+        if (tok > 23) {
             status = 1;
         } else {
             status = 2;
         }
-        //System.out.println("findStatus: " + status);
+        if (tok > 51) {
+            status = 5;
+        }
+        if (tok == 0.0) {
+            status = 3;
+        }
+        System.out.println("findStatus: " + status);
         return status;
     }
 
@@ -255,7 +261,7 @@ public class Progress {
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_avar + "' WHERE (`id` = '4')";
                 stmt.executeUpdate(sql_request);
             }
-            if (status == 1) {
+            if (status == 5) {
                 procent_nagruzka++;
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_nagruzka + "' WHERE (`id` = '5')";
                 stmt.executeUpdate(sql_request);
@@ -273,12 +279,12 @@ public class Progress {
 
         String timeDateNow = solution.dateTimeNow();
         //Фиксируем работу
-        if (status == 1 && triger_work != 1) {
+        if ((status == 1 || status == 5) && triger_work != 1) {
             triger_work = 1;
             work_arrayList.add(timeDateNow);
             programname_arrayList.add("null");
         }
-        if (status != 1 && triger_work != 0) {
+        if (status != 1 && status != 5 && triger_work != 0) {
             triger_work = 0;
             work_arrayList.add(timeDateNow);
         }
@@ -311,11 +317,11 @@ public class Progress {
         }
 
         //Фиксируем нагрузку
-        if (status == 1 && triger_nagruzka != 1) {
+        if (status == 5 && triger_nagruzka != 1) {
             triger_nagruzka = 1;
             nagruzka_arrayList.add(timeDateNow);
         }
-        if (status != 1 && triger_nagruzka != 0) {
+        if (status != 5 && triger_nagruzka != 0) {
             triger_nagruzka = 0;
             nagruzka_arrayList.add(timeDateNow);
         }

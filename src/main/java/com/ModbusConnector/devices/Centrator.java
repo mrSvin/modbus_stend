@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class Liefeld135 {
+public class Centrator {
+
     List<List> parserData = new ArrayList<>();
 
     private String dayNow = "null";
@@ -45,9 +46,10 @@ public class Liefeld135 {
     private Statement stmt;
     private String sql_request;
     private int status = 3;
+    private boolean statusLoad = false;
     private ModbusClient modbusClient;
-    private int countConnect=0;
-    private String complexTable = "liefeld135_days";
+    private int countConnect = 0;
+    private String complexTable = "centrator_days";
 
     @Autowired
     Solution solution;
@@ -57,15 +59,16 @@ public class Liefeld135 {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.17.141", 502);
+            modbusClient = new ModbusClient("192.168.17.119", 502);
 
             if (connect(modbusClient)) {
                 parser(modbusClient);
                 status = findStatus(parserData);
+                statusLoad = findStatusLoad(parserData);
                 countConnect = 0;
             } else {
                 countConnect++;
-                if (countConnect>3) {
+                if (countConnect > 3) {
                     status = 3;
                 }
 
@@ -87,6 +90,8 @@ public class Liefeld135 {
     public boolean connect(ModbusClient target) {
         try {
             target.Connect();
+            byte slaveId = 10;
+            target.setUnitIdentifier(slaveId);
             target.setConnectionTimeout(3000);
             //System.out.println("соединение установлено");
             return true;
@@ -112,19 +117,20 @@ public class Liefeld135 {
                 parserData.add(intValues);
                 parserData.add(floatValues);
 
+
                 try {
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5252, 2)));
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5254, 2)));
-                    floatValues.add(modbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(5256, 2)));
 
-                    System.out.println("tok a: " + floatValues.get(0));
-//                    System.out.println("tok a: " + floatValues.get(1));
-//                    System.out.println("tok a: " + floatValues.get(2));
-
+                    int[] test = modbusClient.ReadHoldingRegisters(10, 3);
+                    List<Integer> state = new ArrayList<>();
+                    state.add(test[0]);
+                    state.add(test[1]);
+                    state.add(test[2]);
+                    parserData.clear();
+                    parserData.add(state);
 
                 } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
-                    System.out.println("Ошибка при чтении данных");
+                    System.out.println("Ошибка при чтении данных " + modbusClient.getipAddress());
                 }
             });
             thread.start();
@@ -142,17 +148,29 @@ public class Liefeld135 {
 
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
     private int findStatus(List<List> parserData) {
-        float tok = (float) parserData.get(1).get(0);
-        if (tok > 30) {
-            status = 1;
+        int state1 = (int) parserData.get(0).get(0);
+        int state2 = (int) parserData.get(0).get(1);
+        int state3 = (int) parserData.get(0).get(2);
+
+        if (state1 == 2 || state2 == 2 || state3 == 2 || state1 == 4 || state2 == 4 || state3 == 4) {
+            return 1;
+        } else if (state1 == 3 || state2 == 3 || state3 == 3) {
+            return 4;
         } else {
-            status = 2;
+            return 2;
         }
-        if (tok == 0.0) {
-            status = 3;
+    }
+
+    private boolean findStatusLoad(List<List> parserData) {
+        int state1 = (int) parserData.get(0).get(0);
+        int state2 = (int) parserData.get(0).get(1);
+        int state3 = (int) parserData.get(0).get(2);
+
+        if (state1 == 4 || state2 == 4 || state3 == 4) {
+            return true;
+        } else {
+            return false;
         }
-        //System.out.println("findStatus: " + status);
-        return status;
     }
 
     private void createTableSQL(String schemaName) {
@@ -160,6 +178,7 @@ public class Liefeld135 {
         dayNow = solution.dateNow();
 
         if (dayNow.equals(dayOld) == false) {
+
             mySQL.deleteTableSQL(complexTable);
 
             procent_work = 0;
@@ -180,6 +199,7 @@ public class Liefeld135 {
             off_arrayList = new ArrayList<String>();
             avar_arrayList = new ArrayList<String>();
             nagruzka_arrayList = new ArrayList<String>();
+
 
             try {
                 con = mySQL.mysqlConnect(con);
@@ -256,7 +276,7 @@ public class Liefeld135 {
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_avar + "' WHERE (`id` = '4')";
                 stmt.executeUpdate(sql_request);
             }
-            if (status == 1) {
+            if (statusLoad == true) {
                 procent_nagruzka++;
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_nagruzka + "' WHERE (`id` = '5')";
                 stmt.executeUpdate(sql_request);
@@ -312,7 +332,7 @@ public class Liefeld135 {
         }
 
         //Фиксируем нагрузку
-        if (status == 1 && triger_nagruzka != 1) {
+        if (statusLoad == true && triger_nagruzka != 1) {
             triger_nagruzka = 1;
             nagruzka_arrayList.add(timeDateNow);
         }
