@@ -75,6 +75,7 @@ public class Epp {
             writeZagruzkaSQL(complexTable, status);
             writeRabotaArray(status);
             writeRabotaSQL(complexTable);
+//            System.out.println(solution.dateTimeNow() + " " + getClass().getSimpleName() + " данные записаны");
         } finally {
             try {
                 modbusClient.Disconnect();

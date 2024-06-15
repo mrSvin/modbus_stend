@@ -59,7 +59,6 @@ public class Connector extends Thread {
     public void connector() {
         System.out.println("активные потоки: " + Thread.activeCount());
 
-        // Запускаем каждую функцию .data() в отдельном потоке
         executorService.submit(() -> stend.data());
         executorService.submit(() -> epp.data());
         executorService.submit(() -> ar55.data());
