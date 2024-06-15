@@ -180,29 +180,16 @@ public class Epp {
                 for (int i = 1; i <= 400; i++) {
                     sql_request = "INSERT INTO `" + schemaName + "`.`" + tableName + "` (`zagruzka`) VALUES ('0'); ";
                     stmt.executeUpdate(sql_request);
-                }
-
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_work` = '" + tableName + " 23:59:59" + "' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
-                }
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_pause` = '" + tableName + " 23:59:59" + "' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
-                }
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_off` = '" + tableName + " 23:59:59" + "' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
-                }
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_avar` = '" + tableName + " 23:59:59" + "' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
-                }
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_nagruzka` = '" + tableName + " 23:59:59" + "' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
-                }
-                for (int i = 1; i <= 400; i++) {
                     sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_name` = 'null' WHERE (`id` = '" + i + "')";
                     stmt.executeUpdate(sql_request);
                 }
