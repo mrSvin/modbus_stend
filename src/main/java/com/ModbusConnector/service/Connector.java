@@ -4,6 +4,9 @@ import com.ModbusConnector.devices.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 public class Connector extends Thread {
 
@@ -50,30 +53,32 @@ public class Connector extends Thread {
         this.klon = klon;
     }
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(20);
+
     @Scheduled(fixedRate = 5000)
     public void connector() {
-
         System.out.println("активные потоки: " + Thread.activeCount());
-        stend.data();
-        epp.data();
-        ar55.data();
-        liteykaBig.data();
-        liteykaMedium.data();
-        nk600.data();
-        sclad.data();
-        pechNerg.data();
-        liefeld110.data();
-        liefeld135.data();
-        kv12.data();
-        sk50.data();
-        press.data();
-        progress.data();
-        centrator.data();
-        trulaser.data();
-        stp4pl.data();
-        saw.data();
-        klon.data();
 
+        // Запускаем каждую функцию .data() в отдельном потоке
+        executorService.submit(() -> stend.data());
+        executorService.submit(() -> epp.data());
+        executorService.submit(() -> ar55.data());
+        executorService.submit(() -> liteykaBig.data());
+        executorService.submit(() -> liteykaMedium.data());
+        executorService.submit(() -> nk600.data());
+        executorService.submit(() -> sclad.data());
+        executorService.submit(() -> pechNerg.data());
+        executorService.submit(() -> liefeld110.data());
+        executorService.submit(() -> liefeld135.data());
+        executorService.submit(() -> kv12.data());
+        executorService.submit(() -> sk50.data());
+        executorService.submit(() -> press.data());
+        executorService.submit(() -> progress.data());
+        executorService.submit(() -> centrator.data());
+        executorService.submit(() -> trulaser.data());
+        executorService.submit(() -> stp4pl.data());
+        executorService.submit(() -> saw.data());
+        executorService.submit(() -> klon.data());
     }
 
 

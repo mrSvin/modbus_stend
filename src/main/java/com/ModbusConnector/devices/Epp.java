@@ -47,7 +47,7 @@ public class Epp {
     private String sql_request;
     private int status = 3;
     private ModbusClient modbusClient;
-    private int countConnect=0;
+    private int countConnect = 0;
     private String complexTable = "epp_days";
 
     @Autowired
@@ -66,7 +66,7 @@ public class Epp {
                 countConnect = 0;
             } else {
                 countConnect++;
-                if (countConnect>3) {
+                if (countConnect > 3) {
                     status = 3;
                 }
 
@@ -103,36 +103,26 @@ public class Epp {
 
         try {
 
-            Thread thread = new Thread(() -> {
-
-                List<Integer> intValues = new ArrayList<>();
-                List<Float> floatValues = new ArrayList<>();
+            List<Integer> intValues = new ArrayList<>();
+            List<Float> floatValues = new ArrayList<>();
 
 
-                parserData.clear();
-                parserData.add(intValues);
-                parserData.add(floatValues);
+            parserData.clear();
+            parserData.add(intValues);
+            parserData.add(floatValues);
 
 
-                int[] dataInt;
-                try {
-                    dataInt = modbusClient.ReadHoldingRegisters(0, 1);
-                    intValues.add(dataInt[0]);
-
-                    //System.out.println("tok: " + intValues.get(0));
-
-                } catch (ModbusException | IOException e) {
-//                    e.printStackTrace();
-                    System.out.println("Ошибка при чтении данных");
-                }
-            });
-            thread.start();
-
+            int[] dataInt;
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
+                dataInt = modbusClient.ReadHoldingRegisters(0, 1);
+                intValues.add(dataInt[0]);
+
+                //System.out.println("tok: " + intValues.get(0));
+
+            } catch (ModbusException | IOException e) {
+//                    e.printStackTrace();
+                System.out.println("Ошибка при чтении данных");
             }
-            thread.interrupt();
 
         } catch (Exception e) {
             e.printStackTrace();
