@@ -69,13 +69,11 @@ public class Epp {
                 if (countConnect > 3) {
                     status = 3;
                 }
-
             }
             createTableSQL(complexTable);
             writeZagruzkaSQL(complexTable, status);
             writeRabotaArray(status);
             writeRabotaSQL(complexTable);
-//            System.out.println(solution.dateTimeNow() + " " + getClass().getSimpleName() + " данные записаны");
         } finally {
             try {
                 modbusClient.Disconnect();
@@ -134,13 +132,13 @@ public class Epp {
     private int findStatus(List<List> parserData) {
         int tok = (int) parserData.get(0).get(0);
 
+        int resultStatus;
         if (tok > 0) {
-            status = 1;
+            resultStatus = 1;
         } else {
-            status = 2;
+            resultStatus = 2;
         }
-        //System.out.println("findStatus: " + status);
-        return status;
+        return resultStatus;
     }
 
     private void createTableSQL(String schemaName) {
