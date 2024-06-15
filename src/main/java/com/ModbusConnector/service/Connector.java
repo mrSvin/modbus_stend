@@ -25,9 +25,10 @@ public class Connector extends Thread {
     private Trulaser trulaser;
     private Stp4pl stp4pl;
     private Saw saw;
+    private Klon klon;
 
     public Connector(Stend stend, Epp epp, Ar55 ar55, LiteykaBig liteykaBig, LiteykaMedium liteykaMedium, PechNerg pechNerg, Nk600 nk600,
-                     Sclad sclad, Kv12 kv12, Liefeld110 liefeld110, Liefeld135 liefeld135, Progress progress, Sk50 sk50, Press press, Centrator centrator, Trulaser trulaser, Stp4pl stp4pl, Saw saw) {
+                     Sclad sclad, Kv12 kv12, Liefeld110 liefeld110, Liefeld135 liefeld135, Progress progress, Sk50 sk50, Press press, Centrator centrator, Trulaser trulaser, Stp4pl stp4pl, Saw saw, Klon klon) {
         this.stend = stend;
         this.epp = epp;
         this.ar55 = ar55;
@@ -46,6 +47,7 @@ public class Connector extends Thread {
         this.trulaser = trulaser;
         this.stp4pl = stp4pl;
         this.saw = saw;
+        this.klon = klon;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -70,6 +72,7 @@ public class Connector extends Thread {
         trulaser.data();
         stp4pl.data();
         saw.data();
+        klon.data();
 
     }
 
