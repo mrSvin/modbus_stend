@@ -4,6 +4,7 @@ import com.ModbusConnector.devices.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -59,26 +60,45 @@ public class Connector extends Thread {
     public void connector() {
         System.out.println("активные потоки: " + Thread.activeCount());
 
-        executorService.submit(() -> stend.data());
-        executorService.submit(() -> epp.data());
-        executorService.submit(() -> ar55.data());
-        executorService.submit(() -> liteykaBig.data());
-        executorService.submit(() -> liteykaMedium.data());
-        executorService.submit(() -> nk600.data());
-        executorService.submit(() -> sclad.data());
-        executorService.submit(() -> pechNerg.data());
-        executorService.submit(() -> liefeld110.data());
-        executorService.submit(() -> liefeld135.data());
-        executorService.submit(() -> kv12.data());
-        executorService.submit(() -> sk50.data());
-        executorService.submit(() -> press.data());
-        executorService.submit(() -> progress.data());
-        executorService.submit(() -> centrator.data());
-        executorService.submit(() -> trulaser.data());
-        executorService.submit(() -> stp4pl.data());
-        executorService.submit(() -> saw.data());
-        executorService.submit(() -> klon.data());
+        // Создаем CountDownLatch с количеством задач
+        CountDownLatch latch = new CountDownLatch(19);
+
+        submitTask(latch, () -> stend.data());
+        submitTask(latch, () -> epp.data());
+        submitTask(latch, () -> ar55.data());
+        submitTask(latch, () -> liteykaBig.data());
+        submitTask(latch, () -> liteykaMedium.data());
+        submitTask(latch, () -> nk600.data());
+        submitTask(latch, () -> sclad.data());
+        submitTask(latch, () -> pechNerg.data());
+        submitTask(latch, () -> liefeld110.data());
+        submitTask(latch, () -> liefeld135.data());
+        submitTask(latch, () -> kv12.data());
+        submitTask(latch, () -> sk50.data());
+        submitTask(latch, () -> press.data());
+        submitTask(latch, () -> progress.data());
+        submitTask(latch, () -> centrator.data());
+        submitTask(latch, () -> trulaser.data());
+        submitTask(latch, () -> stp4pl.data());
+        submitTask(latch, () -> saw.data());
+        submitTask(latch, () -> klon.data());
+
+        try {
+            // Ожидаем завершения всех задач
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Поток был прерван");
+        }
     }
 
-
+    private void submitTask(CountDownLatch latch, Runnable task) {
+        executorService.submit(() -> {
+            try {
+                task.run();
+            } finally {
+                latch.countDown();
+            }
+        });
+    }
 }

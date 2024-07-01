@@ -192,7 +192,7 @@ public class Sclad {
 
 
             try {
-                con = mySQL.mysqlConnect(con);
+                con = mySQL.mysqlConnect();
                 stmt = con.createStatement();
                 String tableName = solution.dateNow();
                 sql_request = "CREATE TABLE `" + schemaName + "`.`" + tableName + "` (`id` INT NOT NULL AUTO_INCREMENT,`zagruzka` INT,`triger_work` VARCHAR(45),`triger_pause` VARCHAR(45),`triger_off` VARCHAR(45),`triger_avar` VARCHAR(45), `triger_nagruzka` VARCHAR(45),`triger_name` VARCHAR(45),PRIMARY KEY (`id`));";
@@ -241,7 +241,7 @@ public class Sclad {
 
     private void writeZagruzkaSQL(String schemaName, int status) {
         try {
-            con = mySQL.mysqlConnect(con);
+            con = mySQL.mysqlConnect();
             stmt = con.createStatement();
             String tableName = solution.dateNow();
 
@@ -339,7 +339,7 @@ public class Sclad {
         try {
             String tableName = solution.dateNow();
 
-            con = mySQL.mysqlConnect(con);
+            Connection con = mySQL.mysqlConnect();
             stmt = con.createStatement();
             sql_request = "SELECT COUNT(*) FROM " + schemaName + ".`" + tableName + "`";
             ResultSet rs = stmt.executeQuery(sql_request);

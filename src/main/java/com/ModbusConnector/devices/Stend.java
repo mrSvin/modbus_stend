@@ -105,6 +105,10 @@ public class Stend {
                 }
 
             }
+            createTableSQL(complexTable);
+            writeZagruzkaSQL(complexTable, status);
+            writeRabotaArray(status);
+            writeRabotaSQL(complexTable);
         } finally {
             try {
                 modbusClient.Disconnect();
@@ -112,11 +116,6 @@ public class Stend {
                 //e.printStackTrace();
             }
         }
-
-        createTableSQL(complexTable);
-        writeZagruzkaSQL(complexTable, status);
-        writeRabotaArray(status);
-        writeRabotaSQL(complexTable);
 
 
     }
@@ -141,7 +140,6 @@ public class Stend {
 
         try {
 
-            Thread thread = new Thread(() -> {
 
                 List<Integer> intValues = new ArrayList<>();
                 List<Float> floatValues = new ArrayList<>();
@@ -203,15 +201,6 @@ public class Stend {
 //                    e.printStackTrace();
                     System.out.println("Ошибка при чтении данных");
                 }
-            });
-            thread.start();
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-            thread.interrupt();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -290,7 +279,7 @@ public class Stend {
 
 
             try {
-                con = mySQL.mysqlConnect(con);
+                Connection con = mySQL.mysqlConnect();
                 stmt = con.createStatement();
                 String tableName = dateNow();
                 sql_request = "CREATE TABLE `" + schemaName + "`.`" + tableName + "` (`id` INT NOT NULL AUTO_INCREMENT,`zagruzka` INT,`triger_work` VARCHAR(45),`triger_pause` VARCHAR(45),`triger_off` VARCHAR(45),`triger_avar` VARCHAR(45), `triger_nagruzka` VARCHAR(45),`triger_name` VARCHAR(45),PRIMARY KEY (`id`));";
@@ -339,7 +328,7 @@ public class Stend {
 
     private void writeZagruzkaSQL(String schemaName, int status) {
         try {
-            con = mySQL.mysqlConnect(con);
+            Connection con = mySQL.mysqlConnect();
             stmt = con.createStatement();
             String tableName = dateNow();
 
@@ -446,7 +435,7 @@ public class Stend {
         try {
             String tableName = dateNow();
 
-            con = mySQL.mysqlConnect(con);
+            Connection con = mySQL.mysqlConnect();
             stmt = con.createStatement();
             sql_request = "SELECT COUNT(*) FROM " + schemaName + ".`" + tableName + "`";
             ResultSet rs = stmt.executeQuery(sql_request);
@@ -462,7 +451,7 @@ public class Stend {
 
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_work` = '" + work_arrayList.get(length_array_work - 1) + "' WHERE (`id` = '" + length_array_work + "');";
                 stmt.executeUpdate(sql_request);
-                System.out.println("SQL Запрос: " + sql_request);
+//                System.out.println("SQL Запрос: " + sql_request);
 
             }
             //Записываем тригеры паузы
@@ -471,7 +460,7 @@ public class Stend {
 
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_pause` = '" + pause_arrayList.get(length_array_pause - 1) + "' WHERE (`id` = '" + length_array_pause + "');";
                 stmt.executeUpdate(sql_request);
-                System.out.println("SQL Запрос: " + sql_request);
+//                System.out.println("SQL Запрос: " + sql_request);
 
             }
             //Записываем тригеры выключения
@@ -480,7 +469,7 @@ public class Stend {
 
                 String sql_rabota = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_off` = '" + off_arrayList.get(length_array_off - 1) + "' WHERE (`id` = '" + length_array_off + "');";
                 stmt.executeUpdate(sql_rabota);
-                System.out.println("SQL Запрос: " + sql_rabota);
+//                System.out.println("SQL Запрос: " + sql_rabota);
 
             }
             //Записываем тригеры аварии
@@ -489,7 +478,7 @@ public class Stend {
 
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_avar` = '" + avar_arrayList.get(length_array_avar - 1) + "' WHERE (`id` = '" + length_array_avar + "');";
                 stmt.executeUpdate(sql_request);
-                System.out.println("SQL Запрос: " + sql_request);
+//                System.out.println("SQL Запрос: " + sql_request);
 
             }
             //Записываем тригеры нагрузки
@@ -497,7 +486,7 @@ public class Stend {
             if (length_array_nagruzka > 0 && length_array_nagruzka < count) {
                 sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_nagruzka` = '" + nagruzka_arrayList.get(length_array_nagruzka - 1) + "' WHERE (`id` = '" + length_array_nagruzka + "');";
                 stmt.executeUpdate(sql_request);
-                System.out.println("SQL Запрос: " + sql_request);
+//                System.out.println("SQL Запрос: " + sql_request);
                 //   }
             }
             //Записываем тригеры имени
@@ -565,7 +554,7 @@ public class Stend {
     private Boolean checkAuthorId(int authorId) {
         try {
 
-            con = mySQL.mysqlConnect(con);
+            Connection con = mySQL.mysqlConnect();
             stmt = con.createStatement();
             sql_request = "SELECT COUNT(*) FROM stanki_auth.operator_stand where author_id = '" + authorId + "'";
             ResultSet rs = stmt.executeQuery(sql_request);

@@ -1,6 +1,7 @@
 package com.ModbusConnector;
 
 import com.mysql.cj.jdbc.Driver;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,47 +13,32 @@ import java.sql.Statement;
 @Component
 public class MySQL {
 
-    private Connection con;
-    private Statement stmt;
-
     @Autowired
     Solution solution;
 
-    public Connection mysqlConnect(Connection con) {
-        try {
-            DriverManager.registerDriver(new Driver());
-            String mysqlUrl = "jdbc:mysql://localhost/?useUnicode=true&serverTimezone=UTC&useSSL=false";
-            con = DriverManager.getConnection(mysqlUrl, "root", "root");
+    String mysqlUrl = "jdbc:mysql://localhost/?useUnicode=true&serverTimezone=UTC&useSSL=false";
+    String login = "root";
+    String password = "root";
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return con;
+    @SneakyThrows
+    public Connection mysqlConnect() {
+
+        DriverManager.registerDriver(new Driver());
+        return DriverManager.getConnection(mysqlUrl, login, password);
     }
 
     public void deleteTableSQL(String tableName) {
+        String sqlRequest = "DROP TABLE `" + tableName + "`.`" + solution.dateNow() + "`";
 
-        try {
-            con = mysqlConnect(con);
-            stmt = con.createStatement();
+        try (Connection con = mysqlConnect();
+             Statement stmt = con.createStatement()) {
 
-            String sql_request = "DROP TABLE `" + tableName + "`.`" + solution.dateNow() + "`";
-            stmt.executeUpdate(sql_request);
+            stmt.executeUpdate(sqlRequest);
             System.out.println("Удалена таблица " + tableName + "." + solution.dateNow());
 
         } catch (SQLException e) {
-//                e.printStackTrace(); // обработка ошибок  DriverManager.getConnection
             System.out.println(tableName + " Удаление не произведено! Вероятно таблица отсутствует");
-        } finally {
-            try {
-                con.close();
-                stmt.close();
-            } catch (SQLException throwables) {
-                //throwables.printStackTrace();
-            }
         }
-
-
     }
 
 }
