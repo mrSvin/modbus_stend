@@ -5,10 +5,8 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.List;
 
 @Component
 public class MySQL {
@@ -38,6 +36,17 @@ public class MySQL {
 
         } catch (SQLException e) {
             System.out.println(tableName + " Удаление не произведено! Вероятно таблица отсутствует");
+        }
+    }
+
+    public void updateTrigger(Connection con, String schemaName, String tableName, String columnName, List<String> arrayList, int count) throws SQLException {
+        if (arrayList.size() > 0 && arrayList.size() < count) {
+            String updateQuery = String.format("UPDATE `" + schemaName + "`.`" + tableName + "` SET `%s` = ? WHERE `id` = ?", columnName);
+            try (PreparedStatement updateStmt = con.prepareStatement(updateQuery)) {
+                updateStmt.setString(1, arrayList.get(arrayList.size() - 1));
+                updateStmt.setInt(2, arrayList.size());
+                updateStmt.executeUpdate();
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.ModbusConnector.devices;
 
 import com.ModbusConnector.MySQL;
+import com.ModbusConnector.Solution;
 import com.ModbusConnector.api.response.ResponseStend;
 import com.ModbusConnector.repository.TableReportsRepository;
 import com.ModbusConnector.service.ServiceReport;
@@ -10,14 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class Stend {
@@ -48,17 +45,17 @@ public class Stend {
     private String dayNow = "null";
     private String dayOld = "null";
 
-    private static int triger_work = 0;
-    private static int triger_pause = 0;
-    private static int triger_off = 0;
-    private static int triger_avar = 0;
-    private static int triger_nagruzka = 0;
+    private int triger_work = 0;
+    private int triger_pause = 0;
+    private int triger_off = 0;
+    private int triger_avar = 0;
+    private int triger_nagruzka = 0;
 
-    private static int procent_work = 0;
-    private static int procent_pause = 0;
-    private static int procent_off = 0;
-    private static int procent_avar = 0;
-    private static int procent_nagruzka = 0;
+    private int procent_work = 0;
+    private int procent_pause = 0;
+    private int procent_off = 0;
+    private int procent_avar = 0;
+    private int procent_nagruzka = 0;
 
     private ArrayList<String> work_arrayList = new ArrayList<String>();
     private ArrayList<String> pause_arrayList = new ArrayList<String>();
@@ -74,6 +71,18 @@ public class Stend {
     private ModbusClient modbusClient;
     private int countConnect=0;
     private String complexTable = "stend_resources_days";
+
+    private static final Map<Integer, String> STATUS_MAP = new HashMap<>();
+
+    @Autowired
+    Solution solution;
+
+    static {
+        STATUS_MAP.put(1, "1");
+        STATUS_MAP.put(2, "2");
+        STATUS_MAP.put(3, "3");
+        STATUS_MAP.put(4, "4");
+    }
 
     public Stend(ServiceReport serviceReport) {
         this.serviceReport = serviceReport;
@@ -327,44 +336,43 @@ public class Stend {
     }
 
     private void writeZagruzkaSQL(String schemaName, int status) {
-        try {
-            Connection con = mySQL.mysqlConnect();
-            stmt = con.createStatement();
-            String tableName = dateNow();
 
-            //sost_rabota: 1 -работа, 2- пауза, 3-выключен, 4- авария
-            if (status == 1) {
-                procent_work++;
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_work + "' WHERE (`id` = '1')";
-                stmt.executeUpdate(sql_request);
-            }
-            if (status == 2) {
-                procent_pause++;
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_pause + "' WHERE (`id` = '2')";
-                stmt.executeUpdate(sql_request);
-            }
-            if (status == 3) {
-                procent_off++;
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_off + "' WHERE (`id` = '3')";
-                stmt.executeUpdate(sql_request);
-            }
-            if (status == 4) {
-                procent_avar++;
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_avar + "' WHERE (`id` = '4')";
-                stmt.executeUpdate(sql_request);
-            }
-            if (status == 1) {
-                procent_nagruzka++;
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = '" + procent_nagruzka + "' WHERE (`id` = '5')";
-                stmt.executeUpdate(sql_request);
+        String tableName = solution.dateNow();
+        String sql = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `zagruzka` = ? WHERE `id` = ?";
+        String id = STATUS_MAP.get(status);
+
+        try (Connection con = mySQL.mysqlConnect();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            switch (status) {
+                case 1:
+                    procent_work++;
+                    pstmt.setInt(1, procent_work);
+                    break;
+                case 2:
+                    procent_pause++;
+                    pstmt.setInt(1, procent_pause);
+                    break;
+                case 3:
+                    procent_off++;
+                    pstmt.setInt(1, procent_off);
+                    break;
+                case 4:
+                    procent_avar++;
+                    pstmt.setInt(1, procent_avar);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected status: " + status);
             }
 
-            con.close();
+            pstmt.setString(2, id);
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace(); // обработка ошибок  DriverManager.getConnection
-            System.out.println("Ошибка SQL !");
+            // Используйте логирование вместо printStackTrace
+            System.err.println("Ошибка SQL: " + e.getMessage());
         }
+
     }
 
     private void writeRabotaArray(int status) {
@@ -431,79 +439,30 @@ public class Stend {
     }
 
     private void writeRabotaSQL(String schemaName) {
+        String tableName = solution.dateNow();
 
-        try {
-            String tableName = dateNow();
+        String countQuery = "SELECT COUNT(*) AS count FROM " + schemaName + ".`" + tableName + "`";
 
-            Connection con = mySQL.mysqlConnect();
-            stmt = con.createStatement();
-            sql_request = "SELECT COUNT(*) FROM " + schemaName + ".`" + tableName + "`";
-            ResultSet rs = stmt.executeQuery(sql_request);
+        try (Connection con = mySQL.mysqlConnect();
+             PreparedStatement countStmt = con.prepareStatement(countQuery);
+             ResultSet rs = countStmt.executeQuery()) {
+
             int count = 0;
-            while (rs.next()) {
-                count = rs.getInt("COUNT(*)");
+            if (rs.next()) {
+                count = rs.getInt("count");
             }
 
-
-            //Записываем тригеры работы
-            int length_array_work = work_arrayList.size();
-            if (length_array_work > 0 && length_array_work < count) {
-
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_work` = '" + work_arrayList.get(length_array_work - 1) + "' WHERE (`id` = '" + length_array_work + "');";
-                stmt.executeUpdate(sql_request);
-//                System.out.println("SQL Запрос: " + sql_request);
-
-            }
-            //Записываем тригеры паузы
-            int length_array_pause = pause_arrayList.size();
-            if (length_array_pause > 0 && length_array_pause < count) {
-
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_pause` = '" + pause_arrayList.get(length_array_pause - 1) + "' WHERE (`id` = '" + length_array_pause + "');";
-                stmt.executeUpdate(sql_request);
-//                System.out.println("SQL Запрос: " + sql_request);
-
-            }
-            //Записываем тригеры выключения
-            int length_array_off = off_arrayList.size();
-            if (length_array_off > 0 && length_array_off < count) {
-
-                String sql_rabota = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_off` = '" + off_arrayList.get(length_array_off - 1) + "' WHERE (`id` = '" + length_array_off + "');";
-                stmt.executeUpdate(sql_rabota);
-//                System.out.println("SQL Запрос: " + sql_rabota);
-
-            }
-            //Записываем тригеры аварии
-            int length_array_avar = avar_arrayList.size();
-            if (length_array_avar > 0 && length_array_avar < count) {
-
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_avar` = '" + avar_arrayList.get(length_array_avar - 1) + "' WHERE (`id` = '" + length_array_avar + "');";
-                stmt.executeUpdate(sql_request);
-//                System.out.println("SQL Запрос: " + sql_request);
-
-            }
-            //Записываем тригеры нагрузки
-            int length_array_nagruzka = nagruzka_arrayList.size();
-            if (length_array_nagruzka > 0 && length_array_nagruzka < count) {
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_nagruzka` = '" + nagruzka_arrayList.get(length_array_nagruzka - 1) + "' WHERE (`id` = '" + length_array_nagruzka + "');";
-                stmt.executeUpdate(sql_request);
-//                System.out.println("SQL Запрос: " + sql_request);
-                //   }
-            }
-            //Записываем тригеры имени
-            int length_array_name = programname_arrayList.size();
-            if (length_array_name > 0 && length_array_name < count) {
-
-                sql_request = "UPDATE `" + schemaName + "`.`" + tableName + "` SET `triger_name` = '" + programname_arrayList.get(length_array_name - 1) + "' WHERE (`id` = '" + length_array_name + "');";
-                stmt.executeUpdate(sql_request);
-
-            }
-            con.close();
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_work", work_arrayList, count);
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_pause", pause_arrayList, count);
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_off", off_arrayList, count);
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_avar", avar_arrayList, count);
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_nagruzka", nagruzka_arrayList, count);
+            mySQL.updateTrigger(con, schemaName, tableName, "triger_name", programname_arrayList, count);
 
         } catch (SQLException e) {
-            //e.printStackTrace(); // обработка ошибок  DriverManager.getConnection
-            //System.out.println("Ошибка SQL !");
+            // Используйте логирование вместо printStackTrace
+            System.err.println("Ошибка SQL: " + e.getMessage());
         }
-
     }
 
     public ResponseStend lastData() {

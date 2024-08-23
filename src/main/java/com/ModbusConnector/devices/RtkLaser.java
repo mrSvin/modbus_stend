@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class Press {
-
-    List<List> parserData = new ArrayList<>();
+public class RtkLaser {
 
     private String dayNow = "null";
     private String dayOld = "null";
@@ -41,17 +39,13 @@ public class Press {
     private ArrayList<String> nagruzka_arrayList = new ArrayList<String>();
     private ArrayList<String> programname_arrayList = new ArrayList<String>();
 
-    private Connection con;
+
     private Statement stmt;
     private String sql_request;
     private int status = 3;
     private ModbusClient modbusClient;
     private int countConnect = 0;
-    private String complexTable = "press_days";
-
-    private float realDavlenie;
-    private float zadDavlenie;
-    private int[] stauscikl;
+    private String complexTable = "rtk_laser_days";
 
     @Autowired
     Solution solution;
@@ -70,11 +64,16 @@ public class Press {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.17.49", 777);
+
+            modbusClient = new ModbusClient("192.168.17.152", 502);
+
+            // Установка ID устройства
+            modbusClient.setUnitIdentifier((byte) 10);
 
             if (connect(modbusClient)) {
-                parser(modbusClient);
-                status = findStatus(parserData);
+                int data = parser(modbusClient);
+                status = findStatus(data);
+
                 countConnect = 0;
             } else {
                 countConnect++;
@@ -87,21 +86,26 @@ public class Press {
             writeZagruzkaSQL(complexTable, status);
             writeRabotaArray(status);
             writeRabotaSQL(complexTable);
+        } catch (Exception e) {
+//            e.printStackTrace();
         } finally {
             try {
                 modbusClient.Disconnect();
             } catch (IOException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
+
 
     }
 
     public boolean connect(ModbusClient target) {
         try {
             target.Connect();
+            byte slaveId = 10;
+            target.setUnitIdentifier(slaveId);
             target.setConnectionTimeout(3000);
-            System.out.println("соединение установлено");
+            //System.out.println("соединение установлено");
             return true;
         } catch (IOException e) {
             System.out.println("соединение не установлено " + getClass().getName());
@@ -111,63 +115,42 @@ public class Press {
         }
     }
 
-    public void parser(ModbusClient modbusClient) {
+    public int parser(ModbusClient modbusClient) {
+
+
+        int stateResult = 0;
 
         try {
 
-            Thread thread = new Thread(() -> {
+            int[] data = modbusClient.ReadHoldingRegisters(3, 1);
+            stateResult = data[0];
 
-                List<Integer> intValues = new ArrayList<>();
-                List<Float> floatValues = new ArrayList<>();
-
-
-                parserData.clear();
-                parserData.add(intValues);
-                parserData.add(floatValues);
-
-
-                try {
-                    realDavlenie = ModbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(0, 2));
-                    zadDavlenie = ModbusClient.ConvertRegistersToFloat(modbusClient.ReadHoldingRegisters(4, 2));
-                    stauscikl = modbusClient.ReadHoldingRegisters(2, 1);
-//                    System.out.println("давление на прессе " + realDavlenie);
-//                    System.out.println("Зад. давление на прессе " + zadDavlenie);
-//                    System.out.println("цикл " + stauscikl[0]);
-
-                } catch (ModbusException | IOException e) {
+        } catch (ModbusException | IOException e) {
 //                    e.printStackTrace();
-                    System.out.println("Ошибка при чтении данных");
-                }
-            });
-            thread.start();
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
-            thread.interrupt();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Ошибка при чтении данных " + modbusClient.getipAddress());
         }
+
+        return stateResult;
     }
 
     //status_work: 1 -работа, 2- пауза, 3-выключен, 4- авария 5-нагрузка
-    private int findStatus(List<List> parserData) {
-        if (stauscikl[0] == 1) {
-            status = 1;
-        } else {
-            status = 2;
+    private int findStatus(int state) {
+        if (state == 2) {
+            return 1;
         }
-        //System.out.println("findStatus: " + status);
-        return status;
+        if (state == 1) {
+            return 4;
+        }
+        return 2;
     }
+
 
     private void createTableSQL(String schemaName) {
 
         dayNow = solution.dateNow();
 
         if (dayNow.equals(dayOld) == false) {
+
             mySQL.deleteTableSQL(complexTable);
 
             procent_work = 0;
@@ -188,6 +171,7 @@ public class Press {
             off_arrayList = new ArrayList<String>();
             avar_arrayList = new ArrayList<String>();
             nagruzka_arrayList = new ArrayList<String>();
+
 
             try {
                 Connection con = mySQL.mysqlConnect();
@@ -284,7 +268,7 @@ public class Press {
         if (status == 1 && triger_work != 1) {
             triger_work = 1;
             work_arrayList.add(timeDateNow);
-            programname_arrayList.add(String.valueOf(zadDavlenie));
+            programname_arrayList.add("null");
         }
         if (status != 1 && triger_work != 0) {
             triger_work = 0;
@@ -318,16 +302,6 @@ public class Press {
             avar_arrayList.add(timeDateNow);
         }
 
-        //Фиксируем нагрузку
-        if (status == 1 && triger_nagruzka != 1) {
-            triger_nagruzka = 1;
-            nagruzka_arrayList.add(timeDateNow);
-        }
-        if (status != 1 && triger_nagruzka != 0) {
-            triger_nagruzka = 0;
-            nagruzka_arrayList.add(timeDateNow);
-        }
-
     }
 
     private void writeRabotaSQL(String schemaName) {
@@ -356,5 +330,6 @@ public class Press {
             System.err.println("Ошибка SQL: " + e.getMessage());
         }
     }
+
 
 }
