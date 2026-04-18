@@ -66,7 +66,7 @@ public class Nk600 {
     public void data() {
 
         try {
-            modbusClient = new ModbusClient("192.168.8.121", 777);
+            modbusClient = new ModbusClient("192.168.17.186", 777);
 
             if (connect(modbusClient)) {
                 parser(modbusClient);
